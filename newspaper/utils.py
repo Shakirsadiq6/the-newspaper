@@ -1,6 +1,15 @@
 import requests
 from bs4 import BeautifulSoup
 
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
+from sumy.summarizers.lsa import LsaSummarizer
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
+api_key = os.environ.get('WORLD_NEWS_API_KEY')
+
 def get_main_news_title_image():
     url = 'https://www.trtworld.com/'
 
@@ -33,3 +42,32 @@ def get_main_news_content():
             paragraph_text = (paragraph.text).split(' GMT — ')
             total_paragraph.append(paragraph_text[-1])
     return total_paragraph
+
+def get_marvel_news():
+    url = f"https://api.worldnewsapi.com/search-news?text=marvel-universe&language=en&api-key={api_key}"
+
+    payload = {}
+    headers = {}
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+
+    return response.json()
+
+def get_hp_news():
+    url = f"https://api.worldnewsapi.com/search-news?text=harry-potter&language=en&api-key={api_key}"
+
+    payload = {}
+    headers = {}
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+
+    return response.json()
+
+def get_summarization(input_text):
+    parser = PlaintextParser.from_string(input_text, Tokenizer("english"))
+    summarizer = LsaSummarizer()
+    summary = summarizer(parser.document, sentences_count=4)
+    total_content = []
+    for sentence in summary:
+        total_content.append(sentence)
+    return total_content
